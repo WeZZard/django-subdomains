@@ -19,7 +19,11 @@ def current_site_domain():
 
     return domain
 
-get_domain = current_site_domain
+
+if hasattr(settings, 'SUBDOMAINS_DOMAIN') and settings.SUBDOMAINS_DOMAIN:
+    get_domain = lambda: settings.SUBDOMAINS_DOMAIN
+else:
+    get_domain = current_site_domain
 
 
 def urljoin(domain, path=None, scheme=None):
