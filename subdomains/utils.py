@@ -58,7 +58,9 @@ def reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
     urlconf = settings.SUBDOMAIN_URLCONFS.get(subdomain, settings.ROOT_URLCONF)
 
     domain = get_domain()
-    if subdomain is not None:
+    if subdomain is not None and not (
+            getattr(settings, "SUBDOMAINS_AVOID_IF_ROOT_URLCONF", False) and
+            urlconf == settings.ROOT_URLCONF):
         domain = '%s.%s' % (subdomain, domain)
 
     path = simple_reverse(viewname, urlconf=urlconf, args=args, kwargs=kwargs,
