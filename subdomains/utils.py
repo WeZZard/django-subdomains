@@ -5,8 +5,9 @@ except ImportError:
     from urllib.parse import urlunparse
 
 from django.conf import settings
-from django.core.urlresolvers import reverse as simple_reverse
-
+from django.urls import reverse as simple_reverse
+from django.urls import NoReverseMatch, get_resolver
+from django.utils import lru_cache
 
 def current_site_domain():
     from django.contrib.sites.models import Site
@@ -43,7 +44,7 @@ def urljoin(domain, path=None, scheme=None):
 
 
 def reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
-        current_app=None):
+            current_app=None):
     """
     Reverses a URL from the given parameters, in a similar fashion to
     :meth:`django.core.urlresolvers.reverse`.
@@ -55,6 +56,13 @@ def reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
     :param kwargs: named arguments used for URL reversing
     :param current_app: hint for the currently executing application
     """
+    return _real_reverse(viewname, subdomain=subdomain, scheme=scheme,
+                         args=args, kwargs=kwargs, current_app=current_app)
+
+
+def _real_reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
+                  current_app=None, _allow_fallback=True):
+    """Actually reverse a URL from the given parameters."""
     urlconf = settings.SUBDOMAIN_URLCONFS.get(subdomain, settings.ROOT_URLCONF)
 
     domain = get_domain()
@@ -63,9 +71,39 @@ def reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
             urlconf == settings.ROOT_URLCONF):
         domain = '%s.%s' % (subdomain, domain)
 
-    path = simple_reverse(viewname, urlconf=urlconf, args=args, kwargs=kwargs,
-        current_app=current_app)
-    return urljoin(domain, path, scheme=scheme)
+    try:
+        path = simple_reverse(
+            viewname, urlconf=urlconf, args=args, kwargs=kwargs,
+            current_app=current_app)
+        return urljoin(domain, path, scheme=scheme)
+
+    except NoReverseMatch:
+        # If nothing was found and SUBDOMAINS_AUTO_NAMESPACE_FALLBACK is set,
+        # try to find a subdomain that matches the view namespace, and use that
+        # to run the search again.
+        if _allow_fallback \
+           and getattr(settings, "SUBDOMAINS_AUTO_NAMESPACE_FALLBACK", False) \
+           and isinstance(viewname, str) and ':' in viewname:
+            ns = viewname.split(':')[0]
+            found, fallback_subdomain = find_subdomain_by_namespace(ns)
+            if found:
+                return _real_reverse(viewname, subdomain=fallback_subdomain,
+                                     scheme=scheme, args=args, kwargs=kwargs,
+                                     current_app=current_app,
+                                     _allow_fallback=False)
+
+        # Not found :/
+        raise
+
+
+@lru_cache.lru_cache(maxsize=None)
+def find_subdomain_by_namespace(namespace):
+    for subdomain, urlconf in settings.SUBDOMAIN_URLCONFS.items():
+        resolver = get_resolver(urlconf)
+        if namespace == resolver.namespace \
+           or namespace in resolver.namespace_dict:
+            return True, subdomain
+    return False, None
 
 
 #: :func:`reverse` bound to insecure (non-HTTPS) URLs scheme
