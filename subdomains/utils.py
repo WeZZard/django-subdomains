@@ -1,11 +1,12 @@
 import functools
 import re
 try:
-    from urlparse import urlunparse
+    from urlparse import urlsplit, urlunparse, urlunsplit
 except ImportError:
-    from urllib.parse import urlunparse
+    from urllib.parse import urlsplit, urlunparse, urlunsplit
 
 from django.conf import settings
+from django.urls import resolve as simple_resolve
 from django.urls import reverse as simple_reverse
 from django.urls import NoReverseMatch, get_resolver
 from django.utils import lru_cache
@@ -130,3 +131,19 @@ secure_reverse = functools.partial(reverse, scheme='https')
 
 #: :func:`reverse` bound to be relative to the current scheme
 relative_reverse = functools.partial(reverse, scheme='')
+
+
+def resolve(path, urlconf=None):
+    url = urlsplit(path)
+    if url.netloc != "":
+        # Absolute URL: guess the urlconf
+        domain, host = get_domain(), url.hostname
+        subdomain, found = get_subdomain(domain, host)
+        if found:
+            urlconf = settings.SUBDOMAIN_URLCONFS.get(subdomain, settings.ROOT_URLCONF)
+
+        # Now build the path
+        path = urlunsplit(("", "", url[2], url[3], url[4]))
+
+    # Use Django's resolve with what's left
+    return simple_resolve(path, urlconf=urlconf)
