@@ -1,4 +1,5 @@
 import functools
+import re
 try:
     from urlparse import urlunparse
 except ImportError:
@@ -25,6 +26,21 @@ if hasattr(settings, 'SUBDOMAINS_DOMAIN') and settings.SUBDOMAINS_DOMAIN:
     get_domain = lambda: settings.SUBDOMAINS_DOMAIN
 else:
     get_domain = current_site_domain
+
+
+def get_subdomain(parent_domain, host):
+    """
+    Find the subdomain of host if host is a subdomain of parent_domain.
+
+    :param parent_domain: the domain, e.g. ``example.com``
+    :param host: the hostname, e.g. ``www.example.com``
+    :returns: the subdomain (e.g. ``www``) and a boolean indicating if it was found
+    """
+    pattern = r'^(?:(?P<subdomain>.*?)\.)?%s(?::.*)?$' % re.escape(parent_domain)
+    matches = re.match(pattern, host)
+    if matches:
+        return matches.group('subdomain'), True
+    return None, False
 
 
 def urljoin(domain, path=None, scheme=None):
