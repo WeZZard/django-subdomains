@@ -94,7 +94,7 @@ def _real_reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
             current_app=current_app)
         return urljoin(domain, path, scheme=scheme)
 
-    except NoReverseMatch:
+    except NoReverseMatch as exc:
         # If nothing was found and SUBDOMAINS_AUTO_NAMESPACE_FALLBACK is set,
         # try to find a subdomain that matches the view namespace, and use that
         # to run the search again.
@@ -110,7 +110,7 @@ def _real_reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
                                      _allow_fallback=False)
 
         # Not found :/
-        raise
+        raise exc
 
 
 @lru_cache.lru_cache(maxsize=None)
