@@ -61,7 +61,7 @@ def urljoin(domain, path=None, scheme=None):
 
 
 def reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
-            current_app=None):
+            current_app=None, path_only=False):
     """
     Reverses a URL from the given parameters, in a similar fashion to
     :meth:`django.core.urlresolvers.reverse`.
@@ -72,13 +72,15 @@ def reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
     :param args: positional arguments used for URL reversing
     :param kwargs: named arguments used for URL reversing
     :param current_app: hint for the currently executing application
+    :param path_only: return the path only instead of an absolute URL
     """
     return _real_reverse(viewname, subdomain=subdomain, scheme=scheme,
-                         args=args, kwargs=kwargs, current_app=current_app)
+                         args=args, kwargs=kwargs, current_app=current_app,
+                         path_only=path_only)
 
 
 def _real_reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
-                  current_app=None, _allow_fallback=True):
+                  current_app=None, path_only=False, _allow_fallback=True):
     """Actually reverse a URL from the given parameters."""
     urlconf = settings.SUBDOMAIN_URLCONFS.get(subdomain, settings.ROOT_URLCONF)
 
@@ -92,6 +94,8 @@ def _real_reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
         path = simple_reverse(
             viewname, urlconf=urlconf, args=args, kwargs=kwargs,
             current_app=current_app)
+        if path_only:
+            return path
         return urljoin(domain, path, scheme=scheme)
 
     except NoReverseMatch as exc:
@@ -107,6 +111,7 @@ def _real_reverse(viewname, subdomain=None, scheme=None, args=None, kwargs=None,
                 return _real_reverse(viewname, subdomain=fallback_subdomain,
                                      scheme=scheme, args=args, kwargs=kwargs,
                                      current_app=current_app,
+                                     path_only=path_only,
                                      _allow_fallback=False)
 
         # Not found :/
