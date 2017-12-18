@@ -1,7 +1,7 @@
 import functools
 
 from django.template.library import SimpleNode, parse_bits
-from django.utils.inspect import getargspec
+from inspect import getfullargspec
 
 
 def silly_tag(register, takes_context=None, name=None):
@@ -13,7 +13,7 @@ def silly_tag(register, takes_context=None, name=None):
 
     """
     def dec(func):
-        params, varargs, varkw, defaults = getargspec(func)
+        params, varargs, varkw, defaults, _, _, _ = getfullargspec(func)
         function_name = (name or getattr(func, '_decorated_function', func).__name__)
 
         @functools.wraps(func)
