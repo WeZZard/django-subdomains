@@ -5,7 +5,7 @@ import re
 from django.conf import settings
 from django.utils.cache import patch_vary_headers
 
-from subdomains.utils import get_domain
+from .utils import get_domain
 
 logger = logging.getLogger(__name__)
 lower = operator.methodcaller('lower')

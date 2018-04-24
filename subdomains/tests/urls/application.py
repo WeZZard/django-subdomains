@@ -3,8 +3,8 @@ try:
 except ImportError:
     from django.conf.urls.defaults import patterns, url  # noqa
 
-from subdomains.tests.urls.default import urlpatterns as default_patterns
-from subdomains.tests.views import view
+from ..urls.default import urlpatterns as default_patterns
+from ..views import view
 
 
 urlpatterns = default_patterns + patterns('',

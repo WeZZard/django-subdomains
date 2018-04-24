@@ -15,9 +15,9 @@ from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
 
-from subdomains.middleware import (SubdomainMiddleware,
+from ..middleware import (SubdomainMiddleware,
     SubdomainURLRoutingMiddleware)
-from subdomains.utils import reverse, urljoin
+from ..utils import reverse, urljoin
 
 
 def prefix_values(dictionary, prefix):
