@@ -6,7 +6,7 @@ from setuptools import find_packages, setup
 
 
 def get_version():
-    from subdomains import __version__
+    from .subdomains import __version__
     return '.'.join(map(str, __version__))
 
 try:

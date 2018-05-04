@@ -20,7 +20,7 @@ if not settings.configured:
     )
 
 
-from subdomains.tests.tests import *  # NOQA
+from ..tests.tests import *  # NOQA
 
 
 def run():
