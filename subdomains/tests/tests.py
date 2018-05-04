@@ -6,25 +6,13 @@ try:
 except ImportError:  # Python 3
     from urllib import parse as urlparse
 
-<<<<<<< HEAD
-try:
-    from django.core.urlresolvers import NoReverseMatch, set_urlconf
-except ImportError:  # Django 2.0
-    from django.urls import NoReverseMatch, set_urlconf
-=======
 from django.urls import NoReverseMatch, set_urlconf
->>>>>>> django2tmp
 from django.template import Context, Template
 from django.test import TestCase
 from django.test.client import RequestFactory
 from django.test.utils import override_settings
 
-<<<<<<< HEAD
-from ..middleware import (SubdomainMiddleware,
-    SubdomainURLRoutingMiddleware)
-=======
 from ..middleware import (SubdomainMiddleware, SubdomainURLRoutingMiddleware)
->>>>>>> django2tmp
 from ..utils import reverse, urljoin
 
 

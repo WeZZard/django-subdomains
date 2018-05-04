@@ -7,17 +7,10 @@ except ImportError:
     from urllib.parse import urlsplit, urlunparse, urlunsplit
 
 from django.conf import settings
-<<<<<<< HEAD
-try:
-    from django.core.urlresolvers import reverse as simple_reverse
-except ImportError:  # Django 2.0
-    from django.urls import reverse as simple_reverse
-=======
 from django.urls import resolve as _primitive_resolve
 from django.urls import reverse as _primitive_reverse
 from django.urls import NoReverseMatch, get_resolver
 from django.utils import lru_cache
->>>>>>> django2tmp
 
 
 def get_domain() -> str:
