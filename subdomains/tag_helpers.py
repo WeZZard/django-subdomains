@@ -13,8 +13,10 @@ def silly_tag(register, takes_context=None, name=None):
 
     """
     def dec(func):
-        params, varargs, varkw, defaults, _, _, _ = getfullargspec(func)
-        function_name = (name or getattr(func, '_decorated_function', func).__name__)
+        params, var_args, var_kw, defaults, _, _, _ = getfullargspec(func)
+        function_name = (
+                name or getattr(func, '_decorated_function', func).__name__
+        )
 
         @functools.wraps(func)
         def compile_func(parser, token):
@@ -24,7 +26,7 @@ def silly_tag(register, takes_context=None, name=None):
                 target_var = bits[-1]
                 bits = bits[:-2] + ["_asvar=True"]
             args, kwargs = parse_bits(
-                parser, bits, params, varargs, varkw, defaults,
+                parser, bits, params, var_args, var_kw, defaults,
                 takes_context, function_name
             )
             return SimpleNode(func, takes_context, args, kwargs, target_var)

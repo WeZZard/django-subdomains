@@ -1,8 +1,8 @@
 from django.template import Library
 from django.urls.exceptions import NoReverseMatch
 
-from subdomains.tag_helpers import silly_tag
-from subdomains.utils import reverse
+from ..tag_helpers import silly_tag
+from ..utils import reverse
 
 
 register = Library()
